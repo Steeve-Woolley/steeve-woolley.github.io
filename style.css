@@ -1,0 +1,338 @@
+/* ══════════════════════════════════════════════════════════════
+   Colours and type live here at the top. Change a value once
+   and it updates across the whole site.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  --linen:      #EFE9DC;   /* the wall */
+  --linen-deep: #E5DCC9;   /* recessed areas */
+  --ink:        #24221D;   /* text */
+  --ink-soft:   #6A6254;   /* wall-label text */
+  --rule:       #D2C8B4;   /* hairlines */
+  --viridian:   #3E5B4B;   /* the only accent, used sparingly */
+
+  --display: "Cormorant Garamond", Georgia, serif;
+  --label:   "Karla", system-ui, sans-serif;
+
+  --measure: 62ch;
+  --frame:   1180px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--linen);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 18px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+img { display: block; max-width: 100%; height: auto; }
+
+a { color: var(--viridian); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--ink); }
+
+:focus-visible {
+  outline: 2px solid var(--viridian);
+  outline-offset: 3px;
+}
+
+.skip {
+  position: absolute; left: -9999px;
+  background: var(--ink); color: var(--linen);
+  padding: 10px 16px; font-family: var(--label); font-size: 13px;
+}
+.skip:focus { left: 12px; top: 12px; z-index: 100; }
+
+
+/* ─── Masthead ──────────────────────────────────────────────── */
+
+.masthead {
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 6rem) 1.5rem clamp(2rem, 5vw, 3.5rem);
+  text-align: center;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  font-weight: 300;
+  font-size: clamp(2.1rem, 6vw, 3.4rem);
+  letter-spacing: 0.14em;
+  line-height: 1.1;
+  margin: 0;
+  text-indent: 0.14em;   /* balances the trailing letter-space */
+}
+
+.wordmark-sub {
+  font-family: var(--label);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 1rem 0 0;
+  text-indent: 0.24em;
+}
+
+.nav {
+  margin-top: 2.25rem;
+  display: flex;
+  justify-content: center;
+  gap: clamp(1.5rem, 4vw, 3rem);
+}
+
+.nav a {
+  font-family: var(--label);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-soft);
+  padding-bottom: 4px;
+  border-bottom: 1px solid transparent;
+}
+.nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+
+/* ─── The featured painting ─────────────────────────────────── */
+
+.hero {
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: clamp(3.5rem, 9vw, 7rem) 1.5rem clamp(3rem, 7vw, 5rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+}
+
+.hero .plate { max-width: 720px; width: 100%; }
+.hero .label { text-align: center; }
+
+
+/* ─── Rooms ─────────────────────────────────────────────────── */
+
+.room {
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: clamp(3.5rem, 8vw, 6rem) 1.5rem;
+}
+
+.room + .room { border-top: 1px solid var(--rule); }
+
+.room-title {
+  font-weight: 300;
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+  margin: 0 0 0.4rem;
+  text-align: center;
+}
+
+.room-note {
+  font-family: var(--label);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 0 0 1rem;
+}
+
+.grid {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.grid--drawings { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+
+
+/* ─── A single hung work ────────────────────────────────────── */
+
+.work {
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  display: block;
+  width: 100%;
+}
+
+.plate {
+  background: var(--linen-deep);
+  padding: 10px;              /* the mount board */
+  border: 1px solid var(--rule);
+  overflow: hidden;
+}
+
+.plate img {
+  width: 100%;
+  transition: transform 500ms ease;
+}
+
+@media (hover: hover) {
+  .work:hover .plate img { transform: scale(1.025); }
+}
+
+.plate .fallback {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: var(--ink-soft);
+}
+
+
+/* ─── The wall label ────────────────────────────────────────── */
+
+.label {
+  margin: 0.95rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rule);
+}
+
+.label .t {
+  display: block;
+  font-style: italic;
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.label .m {
+  display: block;
+  margin-top: 0.4rem;
+  font-family: var(--label);
+  font-size: 0.63rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  line-height: 1.9;
+}
+
+
+/* ─── About ─────────────────────────────────────────────────── */
+
+.about-body {
+  max-width: var(--measure);
+  margin: 2.5rem auto 0;
+  font-size: 1.12rem;
+}
+.about-body p { margin: 0 0 1.4rem; }
+
+
+/* ─── Footer ────────────────────────────────────────────────── */
+
+.footer {
+  border-top: 1px solid var(--rule);
+  padding: 3rem 1.5rem 4rem;
+  text-align: center;
+}
+.footer p {
+  margin: 0;
+  font-family: var(--label);
+  font-size: 0.64rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+
+/* ─── Full-size viewer ──────────────────────────────────────── */
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: #1A1815;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1.5rem, 5vw, 4rem);
+}
+.viewer[hidden] { display: none; }
+
+.viewer-figure {
+  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.viewer-stage {
+  display: flex;
+  min-height: 0;
+  justify-content: center;
+}
+
+.viewer-stage img {
+  max-height: 74vh;
+  width: auto;
+  object-fit: contain;
+}
+
+.viewer-stage .fallback {
+  width: min(60vw, 460px);
+  aspect-ratio: 4 / 5;
+}
+
+.viewer .label {
+  border-top-color: rgba(239, 233, 220, 0.28);
+  color: var(--linen);
+  text-align: center;
+  max-width: 34rem;
+}
+.viewer .label .m { color: rgba(239, 233, 220, 0.62); }
+
+.viewer-close,
+.viewer-nav {
+  position: absolute;
+  background: none;
+  border: none;
+  color: var(--linen);
+  cursor: pointer;
+  font-family: var(--display);
+  line-height: 1;
+  opacity: 0.55;
+  transition: opacity 200ms ease;
+  padding: 0.4rem 0.9rem;
+}
+.viewer-close:hover, .viewer-nav:hover { opacity: 1; }
+
+.viewer-close { top: 1rem; right: 1.25rem; font-size: 2.6rem; }
+.viewer-nav   { top: 50%; transform: translateY(-50%); font-size: 3.6rem; }
+.viewer-prev  { left: 0.25rem; }
+.viewer-next  { right: 0.25rem; }
+
+body.viewer-open { overflow: hidden; }
+
+
+/* ─── Small screens ─────────────────────────────────────────── */
+
+@media (max-width: 560px) {
+  body { font-size: 17px; }
+  .grid, .grid--drawings { grid-template-columns: 1fr; }
+  .viewer-nav { font-size: 2.6rem; }
+}
+
+
+/* ─── Respect people who've turned motion off ───────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

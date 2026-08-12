@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ─────────────────────────────────────────────────────────
+     EDIT THESE THREE LINES with your own details.
+     They control what shows up in Google and when someone
+     shares a link to your site.
+     ───────────────────────────────────────────────────────── -->
+<title>Steeve Woolley — Oil Paintings</title>
+<meta name="description" content="Oil paintings, life drawing, and still life studies by Steeve Woolley.">
+<meta name="author" content="Steeve Woolley">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Karla:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to the work</a>
+
+<header class="masthead">
+  <!-- Your name. Change the text below and it changes everywhere. -->
+  <h1 class="wordmark">Steeve Woolley</h1>
+  <p class="wordmark-sub">Oil painting &amp; drawing</p>
+  <nav class="nav" aria-label="Sections">
+    <a href="#paintings">Paintings</a>
+    <a href="#drawings">Drawings</a>
+    <a href="#about">About</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <!-- The one painting that greets visitors.
+       Set which one by marking it "featured: true" in works.js -->
+  <section class="hero" id="hero" aria-label="Featured work"></section>
+
+  <section class="room" id="paintings">
+    <h2 class="room-title">Paintings</h2>
+    <div class="grid" id="grid-paintings"></div>
+  </section>
+
+  <section class="room" id="drawings">
+    <h2 class="room-title">Drawings</h2>
+    <p class="room-note">Life drawing and still life studies.</p>
+    <div class="grid grid--drawings" id="grid-drawings"></div>
+  </section>
+
+  <!-- ─────────────────────────────────────────────────────────
+       REWRITE THIS in your own voice. Two or three sentences is
+       plenty. Say where you work, what you paint, and how someone
+       can reach you.
+       ───────────────────────────────────────────────────────── -->
+  <section class="room about" id="about">
+    <h2 class="room-title">About</h2>
+    <div class="about-body">
+      <p>I paint in oils from life and from studies made on location. My work returns to the same handful of subjects — light through a window, fruit going soft on a table, the figure held still for twenty minutes.</p>
+      <p>I also run an animation studio, which means most painting happens early, before the day starts asking for things.</p>
+      <p>Work is available. For prices, studio visits, or anything else — <a href="mailto:you@example.com">you@example.com</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>&copy; <span id="year"></span> Steeve Woolley. All images are the artist's own.</p>
+</footer>
+
+<!-- The full-size viewer. Leave this alone — the JavaScript fills it in. -->
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Enlarged view" hidden>
+  <button class="viewer-close" id="viewer-close" aria-label="Close">&times;</button>
+  <button class="viewer-nav viewer-prev" id="viewer-prev" aria-label="Previous work">&#8249;</button>
+  <button class="viewer-nav viewer-next" id="viewer-next" aria-label="Next work">&#8250;</button>
+  <figure class="viewer-figure">
+    <div class="viewer-stage" id="viewer-stage"></div>
+    <figcaption class="label" id="viewer-label"></figcaption>
+  </figure>
+</div>
+
+<script src="works.js"></script>
+<script src="gallery.js"></script>
+</body>
+</html>
