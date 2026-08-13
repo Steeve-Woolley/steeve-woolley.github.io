@@ -22,16 +22,36 @@
 
   function tone(w) { return w.tone || "#6A6254"; }
 
-  // Builds the little museum label that sits under each piece.
-  function labelHTML(w) {
-    var meta = [w.year, w.medium, w.size].filter(Boolean).join(" &nbsp;·&nbsp; ");
-    return '<span class="t">' + esc(w.title) + "</span>" +
-           (meta ? '<span class="m">' + meta + "</span>" : "");
+  // The whole painting first, then each close-up after it.
+  function viewsOf(w) {
+    var list = [];
+    if (w.image) list.push({ image: w.image, note: "" });
+    (w.details || []).forEach(function (d) {
+      if (!d) return;
+      if (typeof d === "string") list.push({ image: d, note: "" });
+      else if (d.image) list.push({ image: d.image, note: d.note || "" });
+    });
+    return list;
   }
+
+  // The little museum label that sits under each piece.
+  function labelHTML(w, extra) {
+    var bits = [w.year, w.medium, w.size].filter(Boolean);
+    var count = (w.details || []).length;
+    if (count && !extra) {
+      bits.push(count === 1 ? "1 detail view" : count + " detail views");
+    }
+    var meta = bits.join(" &nbsp;·&nbsp; ");
+    return '<span class="t">' + esc(w.title) + "</span>" +
+           (meta ? '<span class="m">' + meta + "</span>" : "") +
+           (extra ? '<span class="m note">' + esc(extra) + "</span>" : "");
+  }
+
+  function altOf(w) { return w.alt || w.title; }
 
   function plateHTML(w) {
     var inner = w.image
-      ? '<img src="' + esc(w.image) + '" alt="' + esc(w.title) +
+      ? '<img src="' + esc(w.image) + '" alt="' + esc(altOf(w)) +
         '" loading="lazy" style="background:' + esc(tone(w)) + '">'
       : '<div class="fallback" style="background:' + esc(tone(w)) + '"></div>';
     return '<div class="plate">' + inner + "</div>";
@@ -62,8 +82,15 @@
     var el = document.getElementById(containerId);
     if (!el) return;
 
+    // An empty room is hidden entirely, along with its nav link,
+    // rather than shown empty.
     if (!works.length) {
-      el.innerHTML = '<p class="room-note">Nothing hung here yet.</p>';
+      var section = el.closest ? el.closest("section") : null;
+      if (section) {
+        section.hidden = true;
+        var link = document.querySelector('.nav a[href="#' + section.id + '"]');
+        if (link) link.hidden = true;
+      }
       return;
     }
 
@@ -90,26 +117,57 @@
   var viewer  = document.getElementById("viewer");
   var stage   = document.getElementById("viewer-stage");
   var caption = document.getElementById("viewer-label");
-  var current = 0;
+  var thumbs  = document.getElementById("viewer-thumbs");
+
+  var current = 0;   // which work
+  var view    = 0;   // which photo of that work
   var lastFocused = null;
 
-  function show(i) {
+  function paint() {
+    var w = all[current];
+    var list = viewsOf(w);
+    var v = list[view] || { image: "", note: "" };
+
+    stage.innerHTML = v.image
+      ? '<img src="' + esc(v.image) + '" alt="' + esc(altOf(w)) +
+        (view > 0 ? " — detail" : "") + '" style="background:' + esc(tone(w)) + '">'
+      : '<div class="fallback" style="background:' + esc(tone(w)) + '"></div>';
+    catchMissingImages(stage);
+
+    caption.innerHTML = labelHTML(w, view > 0 ? (v.note || "Detail") : "");
+
+    // Thumbnails only appear when there's more than one photo.
+    if (list.length > 1) {
+      thumbs.innerHTML = list.map(function (item, i) {
+        return '<button class="viewer-thumb" type="button" data-view="' + i + '"' +
+               ' aria-current="' + (i === view ? "true" : "false") + '"' +
+               ' aria-label="' + (i === 0 ? "Whole painting" : "Detail " + i) + '">' +
+               '<img src="' + esc(item.image) + '" alt="" style="background:' +
+               esc(tone(w)) + '"></button>';
+      }).join("");
+      thumbs.hidden = false;
+      catchMissingImages(thumbs);
+    } else {
+      thumbs.innerHTML = "";
+      thumbs.hidden = true;
+    }
+  }
+
+  function showWork(i) {
     if (!all.length) return;
     current = (i + all.length) % all.length;   // wraps around at both ends
-    var w = all[current];
+    view = 0;
+    paint();
+  }
 
-    stage.innerHTML = w.image
-      ? '<img src="' + esc(w.image) + '" alt="' + esc(w.title) +
-        '" style="background:' + esc(tone(w)) + '">'
-      : '<div class="fallback" style="background:' + esc(tone(w)) + '"></div>';
-
-    catchMissingImages(stage);
-    caption.innerHTML = labelHTML(w);
+  function showView(n) {
+    view = n;
+    paint();
   }
 
   function open(i) {
     lastFocused = document.activeElement;
-    show(i);
+    showWork(i);
     viewer.hidden = false;
     document.body.classList.add("viewer-open");
     document.getElementById("viewer-close").focus();
@@ -122,19 +180,24 @@
   }
 
   document.addEventListener("click", function (e) {
-    var work = e.target.closest ? e.target.closest(".work") : null;
+    var t = e.target;
+
+    var work = t.closest ? t.closest(".work") : null;
     if (work) { open(Number(work.dataset.index)); return; }
 
-    if (e.target.id === "viewer-close" || e.target === viewer) { close(); return; }
-    if (e.target.id === "viewer-prev") { show(current - 1); return; }
-    if (e.target.id === "viewer-next") { show(current + 1); }
+    var thumb = t.closest ? t.closest(".viewer-thumb") : null;
+    if (thumb) { showView(Number(thumb.dataset.view)); return; }
+
+    if (t.id === "viewer-close" || t === viewer) { close(); return; }
+    if (t.id === "viewer-prev") { showWork(current - 1); return; }
+    if (t.id === "viewer-next") { showWork(current + 1); }
   });
 
   document.addEventListener("keydown", function (e) {
     if (viewer.hidden) return;
     if (e.key === "Escape")     close();
-    if (e.key === "ArrowLeft")  show(current - 1);
-    if (e.key === "ArrowRight") show(current + 1);
+    if (e.key === "ArrowLeft")  showWork(current - 1);
+    if (e.key === "ArrowRight") showWork(current + 1);
   });
 
   /* ─── Go ───────────────────────────────────────────────────── */
