@@ -78,7 +78,12 @@
            "</button>";
   }
 
-  function render(containerId, works, offset) {
+  // Which piece hangs alone at the top.
+  function featuredWork() {
+    return all.filter(function (w) { return w.featured; })[0] || all[0];
+  }
+
+  function render(containerId, works) {
     var el = document.getElementById(containerId);
     if (!el) return;
 
@@ -94,8 +99,8 @@
       return;
     }
 
-    el.innerHTML = works.map(function (w, i) {
-      return workHTML(w, offset + i);
+    el.innerHTML = works.map(function (w) {
+      return workHTML(w, all.indexOf(w));
     }).join("");
 
     catchMissingImages(el);
@@ -105,7 +110,7 @@
     var el = document.getElementById("hero");
     if (!el) return;
 
-    var pick = all.filter(function (w) { return w.featured; })[0] || all[0];
+    var pick = featuredWork();
     if (!pick) { el.hidden = true; return; }
 
     el.innerHTML = workHTML(pick, all.indexOf(pick));
@@ -203,8 +208,12 @@
   /* ─── Go ───────────────────────────────────────────────────── */
 
   renderHero();
-  render("grid-paintings", paintings, 0);
-  render("grid-drawings",  drawings,  paintings.length);
+
+  // The featured piece is already hanging at the top, so leave it
+  // out of the grid rather than showing it twice.
+  var hero = featuredWork();
+  render("grid-paintings", paintings.filter(function (w) { return w !== hero; }));
+  render("grid-drawings",  drawings.filter(function (w) { return w !== hero; }));
 
   var year = document.getElementById("year");
   if (year) year.textContent = new Date().getFullYear();
