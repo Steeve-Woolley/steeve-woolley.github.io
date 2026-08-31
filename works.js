@@ -31,6 +31,16 @@
 const PAINTINGS = [
 
   {
+    title: "Sycamore Jump",
+    year: "2026",
+    medium: "Oil on canvas",
+    size: "16 × 20 in",
+    image: "images/sycamore-jump.jpg",
+    // alt: "",   <- tell me what's in this one and I'll fill it in
+    tone: "#77805C",
+  },
+
+  {
     title: "Little Green Table",
     year: "2026",
     medium: "Oil on canvas",
