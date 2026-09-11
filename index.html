@@ -4,11 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- ─────────────────────────────────────────────────────────
-     EDIT THESE THREE LINES with your own details.
-     They control what shows up in Google and when someone
-     shares a link to your site.
-     ───────────────────────────────────────────────────────── -->
 <title>Steeve Woolley — Oil Paintings</title>
 <meta name="description" content="Oil paintings by Steeve Woolley, a Canadian painter based in Hamilton, Ontario, born in Cap-Haïtien, Haiti. Interiors, portraits, and landscapes built around light.">
 <meta name="author" content="Steeve Woolley">
@@ -23,7 +18,6 @@
 <a class="skip" href="#main">Skip to the work</a>
 
 <header class="masthead">
-  <!-- Your name. Change the text below and it changes everywhere. -->
   <h1 class="wordmark">Steeve Woolley</h1>
   <p class="wordmark-sub">Oil painting &amp; drawing</p>
   <nav class="nav" aria-label="Sections">
@@ -35,13 +29,26 @@
 
 <main id="main">
 
-  <!-- The one painting that greets visitors.
-       Set which one by marking it "featured: true" in works.js -->
-  <section class="hero" id="hero" aria-label="Featured work"></section>
+  <!-- ─────────────────────────────────────────────────────────
+       The wall. Paintings are hung here at true relative size,
+       worked out from the "size" field in works.js. Don't add
+       anything inside #wall-strip by hand — the JavaScript
+       builds it.
+       ───────────────────────────────────────────────────────── -->
+  <section class="wall-room" id="paintings" aria-label="Paintings">
+    <div class="wall">
+      <div class="wall-viewport" id="wall-viewport">
+        <div class="wall-strip" id="wall-strip"></div>
+        <div class="wall-base" aria-hidden="true"></div>
+      </div>
+      <button class="wall-arrow wall-prev" id="wall-prev" aria-label="Previous painting">&#8249;</button>
+      <button class="wall-arrow wall-next" id="wall-next" aria-label="Next painting">&#8250;</button>
+    </div>
 
-  <section class="room" id="paintings">
-    <h2 class="room-title">Paintings</h2>
-    <div class="grid" id="grid-paintings"></div>
+    <div class="wall-readout">
+      <p class="label" id="wall-label"></p>
+      <p class="wall-count" id="wall-count"></p>
+    </div>
   </section>
 
   <section class="room" id="drawings">
@@ -52,18 +59,28 @@
 
   <section class="room about" id="about">
     <h2 class="room-title">About</h2>
-    <div class="about-body">
-      <p>Steeve Woolley is a Canadian oil painter, born in Cap-Haïtien, Haiti.</p>
 
-      <p>Before he was seven, he spent his days in his cousin's sign-painting studio, watching storefront signs, murals, and lettering come to life by hand. In 1990s Haiti everything was painted, and those hours — paint meeting surface, an image appearing where there had been none — shaped how he understood image-making long before he had words for it.</p>
+    <div class="about-layout">
 
-      <p>After moving to Canada he built a career in animation, a form of visual storytelling that has run alongside his private practice in oil ever since. It has left him with an animator's instinct for light, for composition, and for the narrative weight a single arrested moment can carry.</p>
+      <!-- Your photograph. Put steeve-woolley.jpg in images/ -->
+      <div class="about-portrait">
+        <img src="images/steeve-woolley.jpg" alt="Steeve Woolley" loading="lazy">
+      </div>
 
-      <p>Light is his subject. Particularly the kind that arrives at one hour of the day and makes a familiar space briefly unfamiliar — a room at golden hour, a wall catching the late afternoon, the geometry of somewhere seen a hundred times made strange by the angle of the sun. He works from observation, from architecture, from memory, and from the classical painters he returns to in his favorite museums.</p>
+      <div class="about-body">
+        <p>Steeve Woolley is a Canadian oil painter, born in Cap-Haïtien, Haiti.</p>
 
-      <p>He lives and works in Hamilton, Ontario.</p>
+        <p>Before he was seven, he spent his days in his cousin's sign-painting studio, watching storefront signs, murals, and lettering come to life by hand. In 1990s Haiti everything was painted, and those hours — paint meeting surface, an image appearing where there had been none — shaped how he understood image-making long before he had words for it.</p>
 
-      <p class="contact">Work is available. For prices, studio visits, or anything else — <a href="mailto:woolleysart@gmail.com">woolleysart@gmail.com</a></p>
+        <p>After moving to Canada he built a career in animation, a form of visual storytelling that has run alongside his private practice in oil ever since. It has left him with an animator's instinct for light, for composition, and for the narrative weight a single arrested moment can carry.</p>
+
+        <p>Light is his subject. Particularly the kind that arrives at one hour of the day and makes a familiar space briefly unfamiliar — a room at golden hour, a wall catching the late afternoon, the geometry of somewhere seen a hundred times made strange by the angle of the sun. He works from observation, from architecture, from memory, and from the classical painters he returns to in his favorite museums.</p>
+
+        <p>He lives and works in Hamilton, Ontario.</p>
+
+        <p class="contact">Work is available. For prices, studio visits, or anything else — <a href="mailto:woolleysart@gmail.com">woolleysart@gmail.com</a></p>
+      </div>
+
     </div>
   </section>
 

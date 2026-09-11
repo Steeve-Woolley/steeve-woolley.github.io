@@ -4,12 +4,17 @@
    ══════════════════════════════════════════════════════════════ */
 
 :root {
-  --linen:      #EFE9DC;   /* the wall */
+  --linen:      #EFE9DC;   /* the page */
   --linen-deep: #E5DCC9;   /* recessed areas */
   --ink:        #24221D;   /* text */
   --ink-soft:   #6A6254;   /* wall-label text */
   --rule:       #D2C8B4;   /* hairlines */
   --viridian:   #3E5B4B;   /* the only accent, used sparingly */
+
+  --gallery:    #F7F4EE;   /* the gallery wall itself */
+  --gallery-lo: #EAE5DA;   /* shaded corner of the wall */
+  --floor:      #CFC7B8;   /* the floor */
+  --skirting:   #E2DCCE;   /* baseboard */
 
   --display: "Cormorant Garamond", Georgia, serif;
   --label:   "Karla", system-ui, sans-serif;
@@ -37,16 +42,10 @@ img { display: block; max-width: 100%; height: auto; }
 a { color: var(--viridian); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 a:hover { color: var(--ink); }
 
-:focus-visible {
-  outline: 2px solid var(--viridian);
-  outline-offset: 3px;
-}
+:focus-visible { outline: 2px solid var(--viridian); outline-offset: 3px; }
 
-.skip {
-  position: absolute; left: -9999px;
-  background: var(--ink); color: var(--linen);
-  padding: 10px 16px; font-family: var(--label); font-size: 13px;
-}
+.skip { position: absolute; left: -9999px; background: var(--ink); color: var(--linen);
+        padding: 10px 16px; font-family: var(--label); font-size: 13px; }
 .skip:focus { left: 12px; top: 12px; z-index: 100; }
 
 
@@ -55,9 +54,8 @@ a:hover { color: var(--ink); }
 .masthead {
   max-width: var(--frame);
   margin: 0 auto;
-  padding: clamp(3rem, 8vw, 6rem) 1.5rem clamp(2rem, 5vw, 3.5rem);
+  padding: clamp(3rem, 8vw, 5.5rem) 1.5rem clamp(1.8rem, 4vw, 3rem);
   text-align: center;
-  border-bottom: 1px solid var(--rule);
 }
 
 .wordmark {
@@ -66,13 +64,12 @@ a:hover { color: var(--ink); }
   letter-spacing: 0.14em;
   line-height: 1.1;
   margin: 0;
-  text-indent: 0.14em;   /* balances the trailing letter-space */
+  text-indent: 0.14em;
 }
 
 .wordmark-sub {
   font-family: var(--label);
   font-size: 0.7rem;
-  font-weight: 400;
   letter-spacing: 0.24em;
   text-transform: uppercase;
   color: var(--ink-soft);
@@ -80,12 +77,7 @@ a:hover { color: var(--ink); }
   text-indent: 0.24em;
 }
 
-.nav {
-  margin-top: 2.25rem;
-  display: flex;
-  justify-content: center;
-  gap: clamp(1.5rem, 4vw, 3rem);
-}
+.nav { margin-top: 2rem; display: flex; justify-content: center; gap: clamp(1.5rem, 4vw, 3rem); }
 
 .nav a {
   font-family: var(--label);
@@ -100,20 +92,109 @@ a:hover { color: var(--ink); }
 .nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
 
 
-/* ─── The featured painting ─────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   THE WALL
+   Paintings hang here at true relative size, centred on one
+   line the way they would be in a real room.
+   ══════════════════════════════════════════════════════════════ */
 
-.hero {
-  max-width: var(--frame);
-  margin: 0 auto;
-  padding: clamp(3.5rem, 9vw, 7rem) 1.5rem clamp(3rem, 7vw, 5rem);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.wall-room { margin: clamp(1.5rem, 4vw, 2.5rem) 0 0; }
+
+.wall { position: relative; }
+
+.wall-viewport {
+  position: relative;
+  overflow: hidden;
+  height: clamp(340px, 56vh, 580px);
+  background:
+    linear-gradient(180deg, var(--gallery-lo) 0%, var(--gallery) 22%, var(--gallery) 100%);
+  border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
+  touch-action: pan-y;
 }
 
-.hero .plate { max-width: 720px; width: 100%; }
-.hero .label { text-align: center; }
+/* The floor, and the baseboard where it meets the wall. */
+.wall-base {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 13%;
+  background: var(--floor);
+  border-top: 6px solid var(--skirting);
+  pointer-events: none;
+}
+
+.wall-strip {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  transform: translateX(0);
+  transition: transform 780ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  will-change: transform;
+}
+
+/* One painting, hung. Size and position are set by JavaScript. */
+.hung {
+  position: absolute;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: opacity 500ms ease;
+  opacity: 0.78;
+}
+
+.hung.is-current { opacity: 1; cursor: zoom-in; }
+
+.hung .canvas {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* A stretched canvas stands off the wall a little. */
+  box-shadow:
+    0 1px 2px rgba(40, 34, 26, 0.18),
+    0 10px 22px -10px rgba(40, 34, 26, 0.30);
+}
+
+.hung .canvas img { width: 100%; height: 100%; object-fit: cover; }
+.hung .canvas .fallback { width: 100%; height: 100%; }
+
+.wall-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--display);
+  font-size: 3.2rem;
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0.35;
+  padding: 0.5rem 1.1rem;
+  transition: opacity 220ms ease;
+}
+.wall-arrow:hover { opacity: 0.9; }
+.wall-arrow[disabled] { opacity: 0.1; cursor: default; }
+.wall-prev { left: 0.25rem; }
+.wall-next { right: 0.25rem; }
+
+.wall-readout {
+  max-width: var(--frame);
+  margin: 0 auto;
+  padding: 1.6rem 1.5rem clamp(3rem, 6vw, 4.5rem);
+  text-align: center;
+}
+.wall-readout .label { border-top: none; padding-top: 0; margin: 0; }
+
+.wall-count {
+  font-family: var(--label);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--ink-soft);
+  margin: 1.1rem 0 0;
+}
 
 
 /* ─── Rooms ─────────────────────────────────────────────────── */
@@ -122,9 +203,8 @@ a:hover { color: var(--ink); }
   max-width: var(--frame);
   margin: 0 auto;
   padding: clamp(3.5rem, 8vw, 6rem) 1.5rem;
+  border-top: 1px solid var(--rule);
 }
-
-.room + .room { border-top: 1px solid var(--rule); }
 
 .room-title {
   font-weight: 300;
@@ -147,66 +227,33 @@ a:hover { color: var(--ink); }
 .grid {
   margin-top: clamp(2.5rem, 5vw, 4rem);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
   gap: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem);
   align-items: start;
 }
 
-.grid--drawings { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
-
-
-/* ─── A single hung work ────────────────────────────────────── */
-
 .work {
-  border: none;
-  background: none;
-  padding: 0;
-  margin: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: zoom-in;
-  display: block;
-  width: 100%;
+  border: none; background: none; padding: 0; margin: 0;
+  font: inherit; color: inherit; text-align: left;
+  cursor: zoom-in; display: block; width: 100%;
 }
 
 .plate {
   background: var(--linen-deep);
-  padding: 10px;              /* the mount board */
+  padding: 10px;
   border: 1px solid var(--rule);
   overflow: hidden;
 }
-
-.plate img {
-  width: 100%;
-  transition: transform 500ms ease;
-}
-
-@media (hover: hover) {
-  .work:hover .plate img { transform: scale(1.025); }
-}
-
-.plate .fallback {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  background: var(--ink-soft);
-}
+.plate img { width: 100%; transition: transform 500ms ease; }
+@media (hover: hover) { .work:hover .plate img { transform: scale(1.025); } }
+.plate .fallback { width: 100%; aspect-ratio: 4 / 5; background: var(--ink-soft); }
 
 
 /* ─── The wall label ────────────────────────────────────────── */
 
-.label {
-  margin: 0.95rem 0 0;
-  padding-top: 0.7rem;
-  border-top: 1px solid var(--rule);
-}
+.label { margin: 0.95rem 0 0; padding-top: 0.7rem; border-top: 1px solid var(--rule); }
 
-.label .t {
-  display: block;
-  font-style: italic;
-  font-size: 1.08rem;
-  line-height: 1.35;
-}
+.label .t { display: block; font-style: italic; font-size: 1.08rem; line-height: 1.35; }
 
 .label .m {
   display: block;
@@ -222,70 +269,63 @@ a:hover { color: var(--ink); }
 
 /* ─── About ─────────────────────────────────────────────────── */
 
-.about-body {
-  max-width: var(--measure);
-  margin: 2.5rem auto 0;
-  font-size: 1.12rem;
+.about-layout {
+  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: start;
+  max-width: 980px;
+  margin-left: auto;
+  margin-right: auto;
 }
+
+.about-portrait {
+  background: var(--linen-deep);
+  padding: 10px;
+  border: 1px solid var(--rule);
+}
+.about-portrait img { width: 100%; }
+
+.about-body { font-size: 1.08rem; }
 .about-body p { margin: 0 0 1.4rem; }
+.about-body p:first-child { margin-top: -0.35rem; }
+
+.about-body .contact {
+  margin-top: 2.2rem;
+  padding-top: 1.6rem;
+  border-top: 1px solid var(--rule);
+  font-size: 1rem;
+}
 
 
 /* ─── Footer ────────────────────────────────────────────────── */
 
-.footer {
-  border-top: 1px solid var(--rule);
-  padding: 3rem 1.5rem 4rem;
-  text-align: center;
-}
+.footer { border-top: 1px solid var(--rule); padding: 3rem 1.5rem 4rem; text-align: center; }
 .footer p {
-  margin: 0;
-  font-family: var(--label);
-  font-size: 0.64rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
+  margin: 0; font-family: var(--label); font-size: 0.64rem;
+  letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-soft);
 }
 
 
 /* ─── Full-size viewer ──────────────────────────────────────── */
 
 .viewer {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
+  position: fixed; inset: 0; z-index: 50;
   background: #1A1815;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: flex; align-items: center; justify-content: center;
   padding: clamp(1.5rem, 5vw, 4rem);
 }
 .viewer[hidden] { display: none; }
 
 .viewer-figure {
-  margin: 0;
-  max-width: 100%;
-  max-height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  margin: 0; max-width: 100%; max-height: 100%;
+  display: flex; flex-direction: column; align-items: center;
 }
 
-.viewer-stage {
-  display: flex;
-  min-height: 0;
-  justify-content: center;
-}
-
-.viewer-stage img {
-  max-height: 66vh;
-  width: auto;
-  object-fit: contain;
-}
-
-.viewer-stage .fallback {
-  width: min(60vw, 460px);
-  aspect-ratio: 4 / 5;
-}
+.viewer-stage { display: flex; min-height: 0; justify-content: center; }
+.viewer-stage img { max-height: 66vh; width: auto; object-fit: contain; }
+.viewer-stage .fallback { width: min(60vw, 460px); aspect-ratio: 4 / 5; }
 
 .viewer .label {
   border-top-color: rgba(239, 233, 220, 0.28);
@@ -305,62 +345,48 @@ a:hover { color: var(--ink); }
   margin-top: 0.5rem;
 }
 
-.viewer-thumbs {
-  display: flex;
-  gap: 10px;
-  margin-top: 1.4rem;
-  justify-content: center;
-  flex-wrap: wrap;
-}
+.viewer-thumbs { display: flex; gap: 10px; margin-top: 1.4rem; justify-content: center; flex-wrap: wrap; }
 .viewer-thumbs[hidden] { display: none; }
 
 .viewer-thumb {
-  width: 62px;
-  height: 62px;
-  padding: 0;
+  width: 62px; height: 62px; padding: 0;
   border: 1px solid rgba(239, 233, 220, 0.3);
-  background: none;
-  cursor: pointer;
-  opacity: 0.5;
+  background: none; cursor: pointer; opacity: 0.5;
   transition: opacity 200ms ease, border-color 200ms ease;
   overflow: hidden;
 }
 .viewer-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .viewer-thumb:hover { opacity: 0.85; }
-.viewer-thumb[aria-current="true"] {
-  opacity: 1;
-  border-color: var(--linen);
-}
+.viewer-thumb[aria-current="true"] { opacity: 1; border-color: var(--linen); }
 
-.viewer-close,
-.viewer-nav {
-  position: absolute;
-  background: none;
-  border: none;
-  color: var(--linen);
-  cursor: pointer;
-  font-family: var(--display);
-  line-height: 1;
-  opacity: 0.55;
-  transition: opacity 200ms ease;
+.viewer-close, .viewer-nav {
+  position: absolute; background: none; border: none;
+  color: var(--linen); cursor: pointer;
+  font-family: var(--display); line-height: 1;
+  opacity: 0.55; transition: opacity 200ms ease;
   padding: 0.4rem 0.9rem;
 }
 .viewer-close:hover, .viewer-nav:hover { opacity: 1; }
-
 .viewer-close { top: 1rem; right: 1.25rem; font-size: 2.6rem; }
-.viewer-nav   { top: 50%; transform: translateY(-50%); font-size: 3.6rem; }
-.viewer-prev  { left: 0.25rem; }
-.viewer-next  { right: 0.25rem; }
+.viewer-nav { top: 50%; transform: translateY(-50%); font-size: 3.6rem; }
+.viewer-prev { left: 0.25rem; }
+.viewer-next { right: 0.25rem; }
 
 body.viewer-open { overflow: hidden; }
 
 
 /* ─── Small screens ─────────────────────────────────────────── */
 
+@media (max-width: 760px) {
+  .about-layout { grid-template-columns: 1fr; }
+  .about-portrait { max-width: 260px; margin: 0 auto; }
+}
+
 @media (max-width: 560px) {
   body { font-size: 17px; }
   .grid, .grid--drawings { grid-template-columns: 1fr; }
   .viewer-nav { font-size: 2.6rem; }
+  .wall-arrow { font-size: 2.4rem; padding: 0.4rem 0.6rem; }
 }
 
 
@@ -372,12 +398,4 @@ body.viewer-open { overflow: hidden; }
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
-}
-
-/* The contact line at the end of the bio */
-.about-body .contact {
-  margin-top: 2.2rem;
-  padding-top: 1.6rem;
-  border-top: 1px solid var(--rule);
-  font-size: 1rem;
 }
