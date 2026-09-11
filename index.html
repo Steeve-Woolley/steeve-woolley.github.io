@@ -4,13 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Steeve Woolley — Oil Paintings</title>
+<title>Steeve Woolley</title>
 <meta name="description" content="Oil paintings by Steeve Woolley, a Canadian painter based in Hamilton, Ontario, born in Cap-Haïtien, Haiti. Interiors, portraits, and landscapes built around light.">
 <meta name="author" content="Steeve Woolley">
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Karla:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +16,6 @@
 
 <div class="shell">
 
-  <!-- The name and navigation, off to one side. -->
   <aside class="sidebar">
     <h1 class="wordmark">Steeve Woolley</h1>
     <nav class="nav" aria-label="Sections">
@@ -33,36 +29,38 @@
   <main class="content" id="main">
 
     <!-- ───────────────────────────────────────────────────────
-         The room. Paintings hang here at true relative size,
-         worked out from the "size" field in works.js. Don't put
-         anything inside #wall-strip by hand — JavaScript builds
-         it.
+         The room. The wall photograph tiles sideways and travels
+         with the paintings, so the whole room moves as one.
+         Don't put anything inside #wall-strip by hand —
+         JavaScript builds it.
          ─────────────────────────────────────────────────────── -->
     <section class="wall-room" id="paintings" aria-label="Paintings">
-
       <div class="wall">
+
         <div class="wall-viewport" id="wall-viewport">
           <div class="wall-camera" id="wall-camera">
             <div class="wall-strip" id="wall-strip"></div>
           </div>
-          <div class="wall-base" aria-hidden="true"></div>
         </div>
 
         <button class="wall-arrow wall-prev" id="wall-prev" aria-label="Previous painting">&#8249;</button>
         <button class="wall-arrow wall-next" id="wall-next" aria-label="Next painting">&#8250;</button>
-      </div>
 
-      <div class="wall-readout">
-        <p class="label" id="wall-label"></p>
+        <!-- Appears only when you've stepped in close to a painting. -->
+        <div class="zoom-bar" id="zoom-bar" hidden>
+          <p class="label" id="zoom-label"></p>
+          <div class="zoom-thumbs" id="zoom-thumbs"></div>
+          <button class="zoom-close" id="zoom-close">Step back</button>
+        </div>
+
         <p class="wall-count" id="wall-count"></p>
       </div>
-
     </section>
 
     <section class="room" id="drawings">
       <h2 class="room-title">Drawings</h2>
       <p class="room-note">Life drawing and still life studies.</p>
-      <div class="grid grid--drawings" id="grid-drawings"></div>
+      <div class="grid" id="grid-drawings"></div>
     </section>
 
     <section class="room about" id="about">
@@ -97,18 +95,6 @@
     </footer>
 
   </main>
-</div>
-
-<!-- The full-size viewer. Leave this alone — JavaScript fills it in. -->
-<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Enlarged view" hidden>
-  <button class="viewer-close" id="viewer-close" aria-label="Close">&times;</button>
-  <button class="viewer-nav viewer-prev" id="viewer-prev" aria-label="Previous work">&#8249;</button>
-  <button class="viewer-nav viewer-next" id="viewer-next" aria-label="Next work">&#8250;</button>
-  <figure class="viewer-figure">
-    <div class="viewer-stage" id="viewer-stage"></div>
-    <figcaption class="label" id="viewer-label"></figcaption>
-    <div class="viewer-thumbs" id="viewer-thumbs" hidden></div>
-  </figure>
 </div>
 
 <script src="works.js"></script>
