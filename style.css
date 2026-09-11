@@ -202,6 +202,7 @@ a { color: var(--ink); }
   position: absolute;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   transform: translateY(-50%);
   opacity: 0;
   pointer-events: none;
@@ -211,7 +212,6 @@ a { color: var(--ink); }
 
 .detail {
   display: block;
-  width: 100%;
   overflow: hidden;
   /* Same light as the paintings, a shade softer — these sit
      closer to the wall than a stretched canvas does. */
@@ -248,7 +248,11 @@ a { color: var(--ink); }
 
 /* While you're in close, the arrows and counter get out of the way. */
 .is-zoomed .wall-arrow, .is-zoomed .wall-count { opacity: 0; pointer-events: none; }
-.is-zoomed .didactic { opacity: 0; }
+
+/* Stepped in, the title is already in the bar at the bottom, so the
+   printed card on the wall goes away. Needs to be more specific than
+   .hung.is-current .didactic or that rule wins and you see it twice. */
+.is-zoomed .hung.is-current .didactic { opacity: 0; }
 
 
 /* ─── Stepped-in view ───────────────────────────────────────── */

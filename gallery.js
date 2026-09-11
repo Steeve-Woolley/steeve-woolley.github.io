@@ -135,7 +135,7 @@
   // Each painting gets a canvas rather than an <img>. Keeps the
   // loaded photo on the element so it can be redrawn on resize or
   // when the camera moves closer.
-  function mountShot(holder, src, altText, background, cssW, cssH) {
+  function mountShot(holder, src, altText, background, cssW, cssH, onReady) {
     holder.style.background = background;
 
     if (!src) {
@@ -159,6 +159,7 @@
       var w = cssW || holder.clientWidth;
       var h = cssH || Math.round(w * img.naturalHeight / img.naturalWidth);
       drawShot(cv, img, w, h, 1);
+      if (onReady) onReady(img);
     };
 
     // A missing photo becomes the work's tone colour rather than a
@@ -304,21 +305,39 @@
     var kids = box.querySelectorAll(".detail");
     var n = kids.length;
     var gapY = hPx * 0.06;
-    var side = Math.min((hPx - (n - 1) * gapY) / n, wPx * 0.6);
-    var stackH = n * side + (n - 1) * gapY;
+
+    // Each close-up gets the same slot height; its width follows
+    // from its own proportions, so nothing is cropped. The width
+    // cap keeps a wide landscape close-up from overpowering the
+    // painting it belongs to.
+    var slotH = Math.min((hPx - (n - 1) * gapY) / n, hPx * 0.5);
+    var maxW  = wPx * 0.72;
 
     box.style.left   = (paintingLeft + wPx + wPx * 0.18) + "px";
     box.style.top    = (H * HANG_LINE) + "px";
-    box.style.width  = side + "px";
-    box.style.height = stackH + "px";
+    box.style.height = "";          // shrink to fit, so it stays centred
+    box.style.width  = "";
     box.style.gap    = gapY + "px";
 
-    for (var k = 0; k < n; k++) {
-      kids[k].style.height = side + "px";
-      if (kids[k]._shot) redrawShot(kids[k], side, side, 1);
+    for (var k = 0; k < n; k++) fitDetail(kids[k], slotH, maxW);
+
+    box._slotH = slotH;
+    box._maxW = maxW;
+  }
+
+  function fitDetail(el, slotH, maxW) {
+    var h = slotH;
+    var w = slotH;                                   // square until we know better
+    var img = el._shot && el._shot.img;
+
+    if (img && img.naturalWidth && img.naturalHeight) {
+      w = h * (img.naturalWidth / img.naturalHeight);
+      if (w > maxW) { h = h * maxW / w; w = maxW; }  // too wide: give back height
     }
 
-    box._side = side;
+    el.style.width  = Math.round(w) + "px";
+    el.style.height = Math.round(h) + "px";
+    if (img) redrawShot(el, Math.round(w), Math.round(h), 1);
   }
 
   // Photos for the close-ups aren't fetched until someone actually
@@ -329,14 +348,16 @@
     if (!box || !w.details) return;
 
     var kids = box.querySelectorAll(".detail");
-    var side = box._side || 160;
+    var slotH = box._slotH || 160;
+    var maxW = box._maxW || 240;
 
-    for (var k = 0; k < kids.length; k++) {
-      if (kids[k]._shot) continue;
+    [].slice.call(kids).forEach(function (el, k) {
+      if (el._shot) return;
       var d = w.details[k];
       var src = typeof d === "string" ? d : (d && d.image);
-      mountShot(kids[k], src, w.title + " — detail " + (k + 1), tone(w), side, side);
-    }
+      mountShot(el, src, w.title + " — detail " + (k + 1), tone(w), slotH, slotH,
+                function () { fitDetail(el, slotH, maxW); });
+    });
   }
 
   function showDetails(i, on) {
