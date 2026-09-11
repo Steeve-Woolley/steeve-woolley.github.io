@@ -282,9 +282,9 @@
 
       // First pass mounts the photo; later passes (a resize) just
       // redraw it at the new size.
+      // Geometry now; the photograph itself only when you're near.
       var holder = el.querySelector(".canvas");
       if (holder._shot) redrawShot(holder, wPx, hPx, 1);
-      else mountShot(holder, w.image, altOf(w), tone(w), wPx, hPx);
 
       layoutDetails(i, cursor, wPx, hPx, H);
 
@@ -351,6 +351,25 @@
 
   function isNarrow() { return viewport.clientWidth < 700; }
 
+  // How many paintings either side of you to keep loaded.
+  var NEARBY = 1;
+
+  function ensureLoaded(i) {
+    if (i < 0 || i >= paintings.length || !hung[i]) return;
+    var holder = hung[i].el.querySelector(".canvas");
+    if (!holder || holder._shot || holder._mounting) return;
+    holder._mounting = true;
+    var w = paintings[i];
+    mountShot(holder, w.image, altOf(w), tone(w), hung[i].widthPx, hung[i].heightPx);
+  }
+
+  function loadNearby() {
+    for (var d = 0; d <= NEARBY; d++) {
+      ensureLoaded(atWall - d);
+      ensureLoaded(atWall + d);
+    }
+  }
+
   function slideTo(i, instant) {
     if (!hung.length) return;
     if (zoomed) stepBack();
@@ -374,6 +393,8 @@
     }
 
     hung.forEach(function (h, n) { h.el.classList.toggle("is-current", n === atWall); });
+
+    loadNearby();
 
     if (countEl) countEl.textContent = (atWall + 1) + " / " + hung.length;
     if (prevBtn) prevBtn.disabled = atWall === 0;
