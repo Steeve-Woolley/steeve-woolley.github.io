@@ -140,9 +140,24 @@ a { color: var(--ink); }
   width: 100%;
   height: 100%;
   overflow: hidden;
+
+  /* A stretched canvas stands an inch or two off the wall, so it
+     casts a real shadow. The light is above and a little to the
+     left, which throws the shadow down and slightly right.
+
+     Three layers, from tightest to softest:
+       1. contact — the dark line where canvas edge meets wall
+       2. cast — the shadow proper, offset in the light's direction
+       3. spill — soft ambient falloff further out
+       4. inset — the canvas edge turning away from the light
+
+     To move the light, change the first two numbers of layers
+     2 and 3. Negative X throws the shadow left instead. */
   box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.22),
-    0 16px 28px -16px rgba(0, 0, 0, 0.32);
+    1px 2px 2px      rgba(26, 24, 22, 0.20),
+    5px 9px 12px -3px  rgba(26, 24, 22, 0.26),
+    10px 19px 30px -11px rgba(26, 24, 22, 0.20),
+    inset -1px -1px 0  rgba(26, 24, 22, 0.10);
 }
 .hung .canvas img { width: 100%; height: 100%; object-fit: cover; }
 .hung .canvas .fallback { width: 100%; height: 100%; }
@@ -157,7 +172,7 @@ a { color: var(--ink); }
   background: #FFFFFF;
   padding: 7px 9px 8px;
   text-align: center;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.13);
+  box-shadow: 1px 2px 3px rgba(26, 24, 22, 0.15);
   opacity: 0;
   transition: opacity 500ms ease;
   pointer-events: none;
