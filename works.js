@@ -39,11 +39,10 @@ const PAINTINGS = [
 
   {
     title: "Night Stand",
-    // year: "",   <- what year was this one?
+    year: "2026",
     medium: "Oil on canvas",
     size: "16 × 12 in",
     image: "images/night-stand.jpg",
-    // alt: "",   <- tell me what's in this one and I'll fill it in
     tone: "#4A4238",
   },
 
@@ -53,7 +52,6 @@ const PAINTINGS = [
     medium: "Oil on canvas",
     size: "20 × 16 in",
     image: "images/sycamore-jump.jpg",
-    // alt: "",   <- tell me what's in this one and I'll fill it in
     tone: "#77805C",
   },
 

@@ -21,10 +21,10 @@
 
   /* ─── Things you might want to tweak ───────────────────────── */
 
-  var GAP_INCHES  = 20;    // bare wall between one canvas and the next
-  var HANG_LINE   = 0.42;  // height of the centre line, as a fraction
-  var FILL_HEIGHT = 0.52;  // how much wall the tallest painting fills
-  var FILL_WIDTH  = 0.55;  // ditto for the widest
+  var GAP_INCHES  = 26;    // bare wall between one canvas and the next
+  var HANG_LINE   = 0.44;  // height of the centre line, as a fraction
+  var FILL_HEIGHT = 0.40;  // how much wall the tallest painting fills
+  var FILL_WIDTH  = 0.34;  // ditto for the widest
 
   /* ─── Helpers ──────────────────────────────────────────────── */
 
@@ -97,6 +97,7 @@
      ══════════════════════════════════════════════════════════ */
 
   var viewport = document.getElementById("wall-viewport");
+  var camera   = document.getElementById("wall-camera");
   var strip    = document.getElementById("wall-strip");
   var wallLabel = document.getElementById("wall-label");
   var wallCount = document.getElementById("wall-count");
@@ -138,11 +139,20 @@
       if (d.w > widest)  widest  = d.w;
     });
 
+    // A phone has no room for a big empty wall, so the paintings
+    // take up more of it and hang closer together. The relative
+    // sizes between paintings never change — only how much wall
+    // surrounds them.
+    var narrow = W < 700;
+    var fillH = narrow ? 0.46 : FILL_HEIGHT;
+    var fillW = narrow ? 0.62 : FILL_WIDTH;
+    var gapIn = narrow ? 14 : GAP_INCHES;
+
     // One scale for everything — this is what keeps the size
     // relationships between paintings honest.
-    var ppi = Math.min((H * FILL_HEIGHT) / tallest, (W * FILL_WIDTH) / widest);
+    var ppi = Math.min((H * fillH) / tallest, (W * fillW) / widest);
 
-    var gap = GAP_INCHES * ppi;
+    var gap = gapIn * ppi;
     var cursor = gap;
 
     paintings.forEach(function (w, i) {
@@ -178,6 +188,11 @@
       strip.style.transition = keep;
     } else {
       strip.style.transform = "translateX(" + offset + "px)";
+      if (camera) {
+        camera.classList.remove("is-moving");
+        void camera.offsetWidth;       // restart the animation
+        camera.classList.add("is-moving");
+      }
     }
 
     hung.forEach(function (h, n) {
@@ -331,6 +346,12 @@
       if (Math.abs(dx) > 45) slideTo(atWall + (dx < 0 ? 1 : -1));
       startX = null;
     }, { passive: true });
+  }
+
+  if (camera) {
+    camera.addEventListener("animationend", function () {
+      camera.classList.remove("is-moving");
+    });
   }
 
   var resizeTimer = null;

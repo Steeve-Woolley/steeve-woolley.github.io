@@ -4,23 +4,24 @@
    ══════════════════════════════════════════════════════════════ */
 
 :root {
-  --linen:      #EFE9DC;   /* the page */
-  --linen-deep: #E5DCC9;   /* recessed areas */
-  --ink:        #24221D;   /* text */
-  --ink-soft:   #6A6254;   /* wall-label text */
-  --rule:       #D2C8B4;   /* hairlines */
-  --viridian:   #3E5B4B;   /* the only accent, used sparingly */
+  --page:     #FFFFFF;   /* the page */
+  --ink:      #141414;   /* text */
+  --ink-soft: #8A8A8A;   /* labels, secondary text */
+  --rule:     #E6E6E6;   /* hairlines */
 
-  --gallery:    #F7F4EE;   /* the gallery wall itself */
-  --gallery-lo: #EAE5DA;   /* shaded corner of the wall */
-  --floor:      #CFC7B8;   /* the floor */
-  --skirting:   #E2DCCE;   /* baseboard */
+  /* The room. Kept very close together — a gallery wall is
+     almost white, and reads as a surface only because of the
+     faint gradient across it. */
+  --wall-hi:  #FEFEFE;
+  --wall-mid: #F7F7F6;
+  --wall-lo:  #ECEBE8;
+  --skirting: #FAFAF9;
+  --floor:    #DFDAD3;
 
   --display: "Cormorant Garamond", Georgia, serif;
   --label:   "Karla", system-ui, sans-serif;
 
-  --measure: 62ch;
-  --frame:   1180px;
+  --sidebar: 210px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -29,7 +30,7 @@ html { scroll-behavior: smooth; }
 
 body {
   margin: 0;
-  background: var(--linen);
+  background: var(--page);
   color: var(--ink);
   font-family: var(--display);
   font-size: 18px;
@@ -39,88 +40,99 @@ body {
 
 img { display: block; max-width: 100%; height: auto; }
 
-a { color: var(--viridian); text-decoration-thickness: 1px; text-underline-offset: 3px; }
-a:hover { color: var(--ink); }
+a { color: var(--ink); text-decoration-thickness: 1px; text-underline-offset: 3px; }
 
-:focus-visible { outline: 2px solid var(--viridian); outline-offset: 3px; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 
-.skip { position: absolute; left: -9999px; background: var(--ink); color: var(--linen);
+.skip { position: absolute; left: -9999px; background: var(--ink); color: #fff;
         padding: 10px 16px; font-family: var(--label); font-size: 13px; }
 .skip:focus { left: 12px; top: 12px; z-index: 100; }
 
 
-/* ─── Masthead ──────────────────────────────────────────────── */
+/* ─── Page frame: name on the left, everything else right ───── */
 
-.masthead {
-  max-width: var(--frame);
+.shell {
+  display: grid;
+  grid-template-columns: var(--sidebar) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  max-width: 1640px;
   margin: 0 auto;
-  padding: clamp(3rem, 8vw, 5.5rem) 1.5rem clamp(1.8rem, 4vw, 3rem);
-  text-align: center;
+  padding: clamp(2rem, 4vw, 3.5rem) clamp(1.25rem, 3vw, 3rem);
+}
+
+.sidebar {
+  position: sticky;
+  top: clamp(2rem, 4vw, 3.5rem);
+  align-self: start;
 }
 
 .wordmark {
-  font-weight: 300;
-  font-size: clamp(2.1rem, 6vw, 3.4rem);
-  letter-spacing: 0.14em;
-  line-height: 1.1;
-  margin: 0;
-  text-indent: 0.14em;
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: 1.5rem;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  margin: 0 0 2rem;
 }
 
-.wordmark-sub {
-  font-family: var(--label);
-  font-size: 0.7rem;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin: 1rem 0 0;
-  text-indent: 0.24em;
-}
-
-.nav { margin-top: 2rem; display: flex; justify-content: center; gap: clamp(1.5rem, 4vw, 3rem); }
+.nav { display: flex; flex-direction: column; gap: 0.35rem; }
 
 .nav a {
   font-family: var(--label);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   text-decoration: none;
   color: var(--ink-soft);
-  padding-bottom: 4px;
-  border-bottom: 1px solid transparent;
+  width: fit-content;
 }
-.nav a:hover { color: var(--ink); border-bottom-color: var(--ink); }
+.nav a:hover { color: var(--ink); }
 
 
 /* ══════════════════════════════════════════════════════════════
-   THE WALL
-   Paintings hang here at true relative size, centred on one
-   line the way they would be in a real room.
+   THE ROOM
+   Paintings hang at true relative size, centred on one line the
+   way they are in a real gallery. Everything but the painting
+   you're looking at is very slightly out of focus.
    ══════════════════════════════════════════════════════════════ */
-
-.wall-room { margin: clamp(1.5rem, 4vw, 2.5rem) 0 0; }
 
 .wall { position: relative; }
 
 .wall-viewport {
   position: relative;
   overflow: hidden;
-  height: clamp(340px, 56vh, 580px);
+  height: clamp(380px, 68vh, 760px);
   background:
-    linear-gradient(180deg, var(--gallery-lo) 0%, var(--gallery) 22%, var(--gallery) 100%);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+    radial-gradient(120% 90% at 50% 18%, var(--wall-hi) 0%, var(--wall-mid) 55%, var(--wall-lo) 100%);
   touch-action: pan-y;
 }
 
-/* The floor, and the baseboard where it meets the wall. */
+/* Where the wall meets the floor. */
 .wall-base {
   position: absolute;
   left: 0; right: 0; bottom: 0;
-  height: 13%;
+  height: 11%;
   background: var(--floor);
-  border-top: 6px solid var(--skirting);
+  border-top: 9px solid var(--skirting);
+  box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.06);
   pointer-events: none;
+  z-index: 2;
+}
+
+/* The camera. Scaling lives here so it can't fight the sideways
+   travel, which lives on .wall-strip below. */
+.wall-camera {
+  position: absolute;
+  inset: 0;
+  transform-origin: 50% 44%;
+}
+
+.wall-camera.is-moving { animation: truck-in 820ms cubic-bezier(0.22, 0.61, 0.36, 1); }
+
+@keyframes truck-in {
+  0%   { transform: scale(1); }
+  48%  { transform: scale(1.045); }
+  100% { transform: scale(1); }
 }
 
 .wall-strip {
@@ -128,11 +140,11 @@ a:hover { color: var(--ink); }
   top: 0; left: 0;
   height: 100%;
   transform: translateX(0);
-  transition: transform 780ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  transition: transform 820ms cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change: transform;
 }
 
-/* One painting, hung. Size and position are set by JavaScript. */
+/* One painting, hung. Size and position come from JavaScript. */
 .hung {
   position: absolute;
   padding: 0;
@@ -140,20 +152,26 @@ a:hover { color: var(--ink); }
   background: none;
   cursor: pointer;
   transform: translateY(-50%);
-  transition: opacity 500ms ease;
-  opacity: 0.78;
+  filter: blur(3px);
+  opacity: 0.92;
+  transition: filter 620ms ease, opacity 620ms ease;
 }
 
-.hung.is-current { opacity: 1; cursor: zoom-in; }
+.hung.is-current {
+  filter: blur(0);
+  opacity: 1;
+  cursor: zoom-in;
+}
 
 .hung .canvas {
+  display: block;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* A stretched canvas stands off the wall a little. */
+  /* A stretched canvas stands a little off the wall. */
   box-shadow:
-    0 1px 2px rgba(40, 34, 26, 0.18),
-    0 10px 22px -10px rgba(40, 34, 26, 0.30);
+    0 1px 2px rgba(0, 0, 0, 0.16),
+    0 14px 26px -14px rgba(0, 0, 0, 0.28);
 }
 
 .hung .canvas img { width: 100%; height: 100%; object-fit: cover; }
@@ -168,24 +186,19 @@ a:hover { color: var(--ink); }
   border: none;
   cursor: pointer;
   font-family: var(--display);
-  font-size: 3.2rem;
+  font-size: 2.8rem;
   line-height: 1;
   color: var(--ink);
-  opacity: 0.35;
-  padding: 0.5rem 1.1rem;
+  opacity: 0.3;
+  padding: 0.5rem 1rem;
   transition: opacity 220ms ease;
 }
-.wall-arrow:hover { opacity: 0.9; }
-.wall-arrow[disabled] { opacity: 0.1; cursor: default; }
-.wall-prev { left: 0.25rem; }
-.wall-next { right: 0.25rem; }
+.wall-arrow:hover { opacity: 0.85; }
+.wall-arrow[disabled] { opacity: 0.08; cursor: default; }
+.wall-prev { left: -0.25rem; }
+.wall-next { right: -0.25rem; }
 
-.wall-readout {
-  max-width: var(--frame);
-  margin: 0 auto;
-  padding: 1.6rem 1.5rem clamp(3rem, 6vw, 4.5rem);
-  text-align: center;
-}
+.wall-readout { padding: 1.5rem 0 0; }
 .wall-readout .label { border-top: none; padding-top: 0; margin: 0; }
 
 .wall-count {
@@ -193,42 +206,35 @@ a:hover { color: var(--ink); }
   font-size: 0.62rem;
   letter-spacing: 0.2em;
   color: var(--ink-soft);
-  margin: 1.1rem 0 0;
+  margin: 0.9rem 0 0;
 }
 
 
-/* ─── Rooms ─────────────────────────────────────────────────── */
+/* ─── Other sections ────────────────────────────────────────── */
 
-.room {
-  max-width: var(--frame);
-  margin: 0 auto;
-  padding: clamp(3.5rem, 8vw, 6rem) 1.5rem;
-  border-top: 1px solid var(--rule);
-}
+.room { padding: clamp(4rem, 9vw, 7rem) 0 0; }
 
 .room-title {
   font-weight: 300;
   font-style: italic;
-  font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+  font-size: clamp(1.5rem, 3vw, 1.9rem);
   margin: 0 0 0.4rem;
-  text-align: center;
 }
 
 .room-note {
   font-family: var(--label);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-soft);
-  text-align: center;
-  margin: 0 0 1rem;
+  margin: 0;
 }
 
 .grid {
-  margin-top: clamp(2.5rem, 5vw, 4rem);
+  margin-top: clamp(2rem, 4vw, 3rem);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: clamp(2.5rem, 5vw, 4.5rem) clamp(2rem, 4vw, 3.5rem);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: clamp(2rem, 4vw, 3.5rem) clamp(1.5rem, 3vw, 2.5rem);
   align-items: start;
 }
 
@@ -238,29 +244,23 @@ a:hover { color: var(--ink); }
   cursor: zoom-in; display: block; width: 100%;
 }
 
-.plate {
-  background: var(--linen-deep);
-  padding: 10px;
-  border: 1px solid var(--rule);
-  overflow: hidden;
-}
+.plate { overflow: hidden; background: var(--wall-lo); }
 .plate img { width: 100%; transition: transform 500ms ease; }
-@media (hover: hover) { .work:hover .plate img { transform: scale(1.025); } }
-.plate .fallback { width: 100%; aspect-ratio: 4 / 5; background: var(--ink-soft); }
+@media (hover: hover) { .work:hover .plate img { transform: scale(1.03); } }
+.plate .fallback { width: 100%; aspect-ratio: 4 / 5; }
 
 
-/* ─── The wall label ────────────────────────────────────────── */
+/* ─── Wall labels ───────────────────────────────────────────── */
 
-.label { margin: 0.95rem 0 0; padding-top: 0.7rem; border-top: 1px solid var(--rule); }
-
-.label .t { display: block; font-style: italic; font-size: 1.08rem; line-height: 1.35; }
+.label { margin: 0.9rem 0 0; }
+.label .t { display: block; font-style: italic; font-size: 1.05rem; line-height: 1.35; }
 
 .label .m {
   display: block;
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   font-family: var(--label);
-  font-size: 0.63rem;
-  letter-spacing: 0.15em;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
   line-height: 1.9;
@@ -270,41 +270,34 @@ a:hover { color: var(--ink); }
 /* ─── About ─────────────────────────────────────────────────── */
 
 .about-layout {
-  margin-top: clamp(2.5rem, 5vw, 3.5rem);
+  margin-top: clamp(2rem, 4vw, 3rem);
   display: grid;
-  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
-  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-columns: minmax(0, 270px) minmax(0, 1fr);
+  gap: clamp(1.75rem, 4vw, 3.5rem);
   align-items: start;
-  max-width: 980px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 900px;
 }
 
-.about-portrait {
-  background: var(--linen-deep);
-  padding: 10px;
-  border: 1px solid var(--rule);
-}
 .about-portrait img { width: 100%; }
 
-.about-body { font-size: 1.08rem; }
-.about-body p { margin: 0 0 1.4rem; }
+.about-body { font-size: 1.05rem; }
+.about-body p { margin: 0 0 1.35rem; }
 .about-body p:first-child { margin-top: -0.35rem; }
 
 .about-body .contact {
-  margin-top: 2.2rem;
-  padding-top: 1.6rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
   border-top: 1px solid var(--rule);
-  font-size: 1rem;
+  font-size: 0.98rem;
 }
 
 
 /* ─── Footer ────────────────────────────────────────────────── */
 
-.footer { border-top: 1px solid var(--rule); padding: 3rem 1.5rem 4rem; text-align: center; }
+.footer { margin-top: clamp(4rem, 9vw, 7rem); padding: 2rem 0 1rem; border-top: 1px solid var(--rule); }
 .footer p {
-  margin: 0; font-family: var(--label); font-size: 0.64rem;
-  letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink-soft);
+  margin: 0; font-family: var(--label); font-size: 0.6rem;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-soft);
 }
 
 
@@ -312,59 +305,45 @@ a:hover { color: var(--ink); }
 
 .viewer {
   position: fixed; inset: 0; z-index: 50;
-  background: #1A1815;
+  background: #111;
   display: flex; align-items: center; justify-content: center;
   padding: clamp(1.5rem, 5vw, 4rem);
 }
 .viewer[hidden] { display: none; }
 
-.viewer-figure {
-  margin: 0; max-width: 100%; max-height: 100%;
-  display: flex; flex-direction: column; align-items: center;
-}
+.viewer-figure { margin: 0; max-width: 100%; max-height: 100%;
+                 display: flex; flex-direction: column; align-items: center; }
 
 .viewer-stage { display: flex; min-height: 0; justify-content: center; }
 .viewer-stage img { max-height: 66vh; width: auto; object-fit: contain; }
 .viewer-stage .fallback { width: min(60vw, 460px); aspect-ratio: 4 / 5; }
 
-.viewer .label {
-  border-top-color: rgba(239, 233, 220, 0.28);
-  color: var(--linen);
-  text-align: center;
-  max-width: 34rem;
-}
-.viewer .label .m { color: rgba(239, 233, 220, 0.62); }
+.viewer .label { color: #fff; text-align: center; max-width: 34rem; }
+.viewer .label .m { color: rgba(255, 255, 255, 0.6); }
 
 .viewer .label .note {
-  font-family: var(--display);
-  font-style: italic;
-  font-size: 0.92rem;
-  letter-spacing: 0;
-  text-transform: none;
-  color: rgba(239, 233, 220, 0.78);
-  margin-top: 0.5rem;
+  font-family: var(--display); font-style: italic; font-size: 0.92rem;
+  letter-spacing: 0; text-transform: none;
+  color: rgba(255, 255, 255, 0.78); margin-top: 0.5rem;
 }
 
 .viewer-thumbs { display: flex; gap: 10px; margin-top: 1.4rem; justify-content: center; flex-wrap: wrap; }
 .viewer-thumbs[hidden] { display: none; }
 
 .viewer-thumb {
-  width: 62px; height: 62px; padding: 0;
-  border: 1px solid rgba(239, 233, 220, 0.3);
+  width: 60px; height: 60px; padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.3);
   background: none; cursor: pointer; opacity: 0.5;
-  transition: opacity 200ms ease, border-color 200ms ease;
-  overflow: hidden;
+  transition: opacity 200ms ease, border-color 200ms ease; overflow: hidden;
 }
 .viewer-thumb img { width: 100%; height: 100%; object-fit: cover; }
 .viewer-thumb:hover { opacity: 0.85; }
-.viewer-thumb[aria-current="true"] { opacity: 1; border-color: var(--linen); }
+.viewer-thumb[aria-current="true"] { opacity: 1; border-color: #fff; }
 
 .viewer-close, .viewer-nav {
-  position: absolute; background: none; border: none;
-  color: var(--linen); cursor: pointer;
-  font-family: var(--display); line-height: 1;
-  opacity: 0.55; transition: opacity 200ms ease;
-  padding: 0.4rem 0.9rem;
+  position: absolute; background: none; border: none; color: #fff; cursor: pointer;
+  font-family: var(--display); line-height: 1; opacity: 0.55;
+  transition: opacity 200ms ease; padding: 0.4rem 0.9rem;
 }
 .viewer-close:hover, .viewer-nav:hover { opacity: 1; }
 .viewer-close { top: 1rem; right: 1.25rem; font-size: 2.6rem; }
@@ -375,18 +354,24 @@ a:hover { color: var(--ink); }
 body.viewer-open { overflow: hidden; }
 
 
-/* ─── Small screens ─────────────────────────────────────────── */
+/* ─── Narrower screens ──────────────────────────────────────── */
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; gap: 2rem; }
+  .sidebar { position: static; }
+  .wordmark { margin-bottom: 1rem; }
+  .nav { flex-direction: row; flex-wrap: wrap; gap: 1.25rem; }
   .about-layout { grid-template-columns: 1fr; }
-  .about-portrait { max-width: 260px; margin: 0 auto; }
+  .about-portrait { max-width: 240px; }
+  .wall-prev { left: 0; }
+  .wall-next { right: 0; }
 }
 
 @media (max-width: 560px) {
   body { font-size: 17px; }
   .grid, .grid--drawings { grid-template-columns: 1fr; }
+  .wall-arrow { font-size: 2.2rem; padding: 0.4rem 0.5rem; }
   .viewer-nav { font-size: 2.6rem; }
-  .wall-arrow { font-size: 2.4rem; padding: 0.4rem 0.6rem; }
 }
 
 
@@ -394,6 +379,7 @@ body.viewer-open { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
+  .wall-camera.is-moving { animation: none; }
   *, *::before, *::after {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
