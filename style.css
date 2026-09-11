@@ -196,6 +196,33 @@ a { color: var(--ink); }
   line-height: 1.55;
 }
 
+/* Close-ups, hung to the right of their painting. Invisible until
+   you step in, then they fade up alongside it. */
+.details {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(-50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 520ms ease 180ms;
+}
+.details.is-showing { opacity: 1; }
+
+.detail {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  /* Same light as the paintings, a shade softer — these sit
+     closer to the wall than a stretched canvas does. */
+  box-shadow:
+    1px 1px 2px rgba(26, 24, 22, 0.16),
+    3px 6px 9px -3px rgba(26, 24, 22, 0.20),
+    7px 13px 22px -10px rgba(26, 24, 22, 0.16);
+}
+.detail .shot { display: block; width: 100%; height: 100%; }
+.detail .fallback { width: 100%; height: 100%; }
+
 .wall-arrow {
   position: absolute;
   top: 50%;

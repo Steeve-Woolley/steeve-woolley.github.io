@@ -200,13 +200,26 @@
   function buildWall() {
     if (!strip || !paintings.length) return;
 
-    strip.innerHTML = paintings.map(function (w, i) {
-      return '<button class="hung" type="button" data-wall="' + i + '"' +
-             ' aria-label="' + esc(w.title) + '">' +
-             '<span class="canvas"></span>' +
-             '<span class="didactic">' + labelHTML(w) + "</span>" +
-             "</button>";
-    }).join("");
+    strip.innerHTML =
+      paintings.map(function (w, i) {
+        return '<button class="hung" type="button" data-wall="' + i + '"' +
+               ' aria-label="' + esc(w.title) + '">' +
+               '<span class="canvas"></span>' +
+               '<span class="didactic">' + labelHTML(w) + "</span>" +
+               "</button>";
+      }).join("") +
+      // Close-ups hang to the right of their painting, on the bare
+      // wall between it and the next one. They stay invisible until
+      // you step in.
+      paintings.map(function (w, i) {
+        var list = w.details || [];
+        if (!list.length) return "";
+        return '<div class="details" data-for="' + i + '">' +
+               list.map(function (d, j) {
+                 return '<span class="detail" data-detail="' + j + '"></span>';
+               }).join("") +
+               "</div>";
+      }).join("");
 
     hung = [].slice.call(strip.querySelectorAll(".hung")).map(function (el) {
       return { el: el, centre: 0, widthPx: 0, heightPx: 0 };
@@ -273,12 +286,70 @@
       if (holder._shot) redrawShot(holder, wPx, hPx, 1);
       else mountShot(holder, w.image, altOf(w), tone(w), wPx, hPx);
 
+      layoutDetails(i, cursor, wPx, hPx, H);
+
       cursor += wPx + gap;
     });
 
     strip.style.width = (cursor + lead) + "px";
     slideTo(atWall, true);
   }
+
+  // A stack of close-ups on the wall to the right of a painting,
+  // sized so the group reads as secondary to the work itself.
+  function layoutDetails(i, paintingLeft, wPx, hPx, H) {
+    var box = strip.querySelector('.details[data-for="' + i + '"]');
+    if (!box) return;
+
+    var kids = box.querySelectorAll(".detail");
+    var n = kids.length;
+    var gapY = hPx * 0.06;
+    var side = Math.min((hPx - (n - 1) * gapY) / n, wPx * 0.6);
+    var stackH = n * side + (n - 1) * gapY;
+
+    box.style.left   = (paintingLeft + wPx + wPx * 0.18) + "px";
+    box.style.top    = (H * HANG_LINE) + "px";
+    box.style.width  = side + "px";
+    box.style.height = stackH + "px";
+    box.style.gap    = gapY + "px";
+
+    for (var k = 0; k < n; k++) {
+      kids[k].style.height = side + "px";
+      if (kids[k]._shot) redrawShot(kids[k], side, side, 1);
+    }
+
+    box._side = side;
+  }
+
+  // Photos for the close-ups aren't fetched until someone actually
+  // steps in — no sense loading them for visitors who never do.
+  function mountDetails(i) {
+    var w = paintings[i];
+    var box = strip.querySelector('.details[data-for="' + i + '"]');
+    if (!box || !w.details) return;
+
+    var kids = box.querySelectorAll(".detail");
+    var side = box._side || 160;
+
+    for (var k = 0; k < kids.length; k++) {
+      if (kids[k]._shot) continue;
+      var d = w.details[k];
+      var src = typeof d === "string" ? d : (d && d.image);
+      mountShot(kids[k], src, w.title + " — detail " + (k + 1), tone(w), side, side);
+    }
+  }
+
+  function showDetails(i, on) {
+    var box = strip.querySelector('.details[data-for="' + i + '"]');
+    if (box) box.classList.toggle("is-showing", !!on);
+  }
+
+  function hideAllDetails() {
+    var boxes = strip.querySelectorAll(".details");
+    for (var k = 0; k < boxes.length; k++) boxes[k].classList.remove("is-showing");
+  }
+
+  function isNarrow() { return viewport.clientWidth < 700; }
 
   function slideTo(i, instant) {
     if (!hung.length) return;
@@ -328,6 +399,14 @@
     // original photo at the larger size rather than stretching
     // the version made for the wall.
     redrawShot(h.el.querySelector(".canvas"), h.widthPx, h.heightPx, scale);
+
+    // On a wide screen the close-ups hang beside the painting. A
+    // phone has no room beside anything, so there they stay in the
+    // bar at the bottom.
+    if (!isNarrow()) {
+      mountDetails(atWall);
+      showDetails(atWall, true);
+    }
     viewIndex = 0;
     room.classList.add("is-zoomed");
     paintZoomBar();
@@ -340,6 +419,7 @@
     zoomed = false;
     room.classList.remove("is-zoomed");
     zoomBar.hidden = true;
+    hideAllDetails();
     setCanvasImage(viewsOf(paintings[atWall])[0]);
     var back = hung[atWall];
     redrawShot(back.el.querySelector(".canvas"), back.widthPx, back.heightPx, 1);
@@ -365,7 +445,7 @@
 
     zoomLabel.innerHTML = labelHTML(w, viewIndex > 0 ? (v.note || "Detail") : "");
 
-    if (list.length > 1) {
+    if (list.length > 1 && isNarrow()) {
       zoomThumbs.innerHTML = list.map(function (item, i) {
         return '<button class="zoom-thumb" type="button" data-view="' + i + '"' +
                ' aria-current="' + (i === viewIndex ? "true" : "false") + '"' +
