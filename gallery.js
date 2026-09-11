@@ -22,11 +22,13 @@
 
   /* ─── Things you might want to tweak ───────────────────────── */
 
-  var GAP_INCHES  = 30;    // bare wall between one canvas and the next
-  var HANG_LINE   = 0.44;  // centre line, as a fraction of wall height
-  var FILL_HEIGHT = 0.34;  // how much wall the tallest painting fills
-  var FILL_WIDTH  = 0.26;  // ditto for the widest
+  var GAP_INCHES  = 26;    // bare wall between one canvas and the next
+  var HANG_LINE   = 0.40;  // centre line, as a fraction of wall height
+  var FILL_HEIGHT = 0.50;  // how much wall the tallest painting fills
+  var FILL_WIDTH  = 0.36;  // ditto for the widest
   var ZOOM_FILL   = 0.74;  // how much of the screen a painting fills up close
+  var ANCHOR      = 0.30;  // where the current painting sits across the wall
+                           // (0 = hard left, 0.5 = middle)
 
   /* ─── Helpers ──────────────────────────────────────────────── */
 
@@ -104,6 +106,7 @@
   var zoomThumbs = document.getElementById("zoom-thumbs");
 
   var hung = [];     // { el, centre, heightPx }
+  var anchorX = 0.30;
   var atWall = 0;
   var zoomed = false;
   var viewIndex = 0;
@@ -144,15 +147,23 @@
     // take more of it and hang closer together. The sizes relative
     // to each other never change — only the wall around them.
     var narrow = W < 700;
-    var fillH = narrow ? 0.42 : FILL_HEIGHT;
-    var fillW = narrow ? 0.52 : FILL_WIDTH;
+    var fillH = narrow ? 0.46 : FILL_HEIGHT;
+    var fillW = narrow ? 0.60 : FILL_WIDTH;
     var gapIn = narrow ? 16 : GAP_INCHES;
+
+    // A phone is too cramped to hold a painting off to one side,
+    // so there it sits in the middle instead.
+    anchorX = narrow ? 0.5 : ANCHOR;
+    if (camera) {
+      camera.style.transformOrigin =
+        (anchorX * 100) + "% " + (HANG_LINE * 100) + "%";
+    }
 
     var ppi = Math.min((H * fillH) / tallest, (W * fillW) / widest);
     var gap = gapIn * ppi;
 
-    // A screen's width of bare wall before the first painting and
-    // after the last, so the tiled photograph never runs out.
+    // Bare wall before the first painting and after the last, so
+    // the tiled photograph never runs out at either end.
     var lead = W;
     var cursor = lead;
 
@@ -181,7 +192,7 @@
     if (zoomed) stepBack();
 
     atWall = Math.max(0, Math.min(i, hung.length - 1));
-    var offset = viewport.clientWidth / 2 - hung[atWall].centre;
+    var offset = viewport.clientWidth * anchorX - hung[atWall].centre;
 
     if (instant) {
       var keep = strip.style.transition;
