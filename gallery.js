@@ -363,9 +363,10 @@
 
   buildWall();
 
-  var startAt = 0;
-  paintings.forEach(function (w, i) { if (w.featured) startAt = i; });
-  slideTo(startAt, true);
+  // Always open at the left end of the wall, on the first
+  // painting in works.js. Reorder that list to change what
+  // greets people.
+  slideTo(0, true);
 
   window.addEventListener("load", layoutWall);
 

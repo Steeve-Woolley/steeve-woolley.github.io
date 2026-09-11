@@ -26,12 +26,10 @@
              this read aloud, and Google reads it too. Worth doing.
    "details" optional close-ups. Leave the line out if there are none.
 
-   Exactly ONE piece has  featured: true  — that's the painting
-   that greets people at the top of the page. It hangs alone up
-   there and is left out of the grid below, so it never appears
-   twice.
-
-   Order below = order on the page. Rearrange freely.
+   ORDER IS EVERYTHING. The list below is the order the paintings
+   hang on the wall, left to right, and visitors always start at
+   the far left on the first one. To change what greets people,
+   move that painting's block to the top.
    ══════════════════════════════════════════════════════════════ */
 
 
@@ -77,7 +75,6 @@ const PAINTINGS = [
     image: "images/bay-front.jpg",
     alt: "The Hamilton bayfront at golden hour, water and sky lit low and warm.",
     tone: "#B5813F",
-    featured: true,
   },
 
   {
