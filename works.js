@@ -42,6 +42,11 @@ const PAINTINGS = [
     size: "16 × 12 in",
     image: "images/night-stand.jpg",
     tone: "#4A4238",
+
+    details: [
+      { image: "images/night-stand-detail-1.jpg" },
+      { image: "images/night-stand-detail-2.jpg" },
+    ],
   },
 
   {
@@ -63,7 +68,8 @@ const PAINTINGS = [
     tone: "#6B7A5E",
 
     details: [
-      { image: "images/little-green-table-detail-1.jpg", note: "Close view of the table" },
+      { image: "images/little-green-table-detail-1.jpg" },
+      { image: "images/little-green-table-detail-2.jpg" },
     ],
   },
 
@@ -75,6 +81,11 @@ const PAINTINGS = [
     image: "images/bay-front.jpg",
     alt: "The Hamilton bayfront at golden hour, water and sky lit low and warm.",
     tone: "#B5813F",
+
+    details: [
+      { image: "images/bay-front-detail-1.jpg" },
+      { image: "images/bay-front-detail-2.jpg" },
+    ],
   },
 
   {
@@ -85,6 +96,11 @@ const PAINTINGS = [
     image: "images/my-boy.jpg",
     alt: "Portrait of Cassian, the artist's dog, at two years old.",
     tone: "#7A5C42",
+
+    details: [
+      { image: "images/my-boy-detail-1.jpg" },
+      { image: "images/my-boy-detail-2.jpg" },
+    ],
   },
 
   {
@@ -95,6 +111,11 @@ const PAINTINGS = [
     image: "images/self-portrait.jpg",
     alt: "Self portrait of the artist with a wet afro.",
     tone: "#4E3B30",
+
+    details: [
+      { image: "images/self-portrait-detail-1.jpg" },
+      { image: "images/self-portrait-detail-2.jpg" },
+    ],
   },
 
   {
@@ -105,6 +126,11 @@ const PAINTINGS = [
     image: "images/glass-house.jpg",
     alt: "Still life of a plant terrarium beside a window in a brick apartment.",
     tone: "#8A6A55",
+
+    details: [
+      { image: "images/glass-house-detail-1.jpg" },
+      { image: "images/glass-house-detail-2.jpg" },
+    ],
   },
 
 ];
