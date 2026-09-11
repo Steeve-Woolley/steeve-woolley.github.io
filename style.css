@@ -159,7 +159,7 @@ a { color: var(--ink); }
     10px 19px 30px -11px rgba(26, 24, 22, 0.20),
     inset -1px -1px 0  rgba(26, 24, 22, 0.10);
 }
-.hung .canvas img { width: 100%; height: 100%; object-fit: cover; }
+.hung .canvas .shot { display: block; width: 100%; height: 100%; }
 .hung .canvas .fallback { width: 100%; height: 100%; }
 
 /* The printed card on the wall beneath the painting. */
@@ -287,8 +287,9 @@ a { color: var(--ink); }
 }
 
 .grid figure { margin: 0; }
-.grid .plate { overflow: hidden; background: var(--wall-fallback); }
-.grid .plate .fallback { width: 100%; aspect-ratio: 4 / 5; }
+.grid .plate { display: block; overflow: hidden; background: var(--wall-fallback); }
+.grid .plate .shot { display: block; width: 100%; height: 100%; }
+.grid .plate .fallback { width: 100%; height: 100%; }
 
 .grid figcaption { margin-top: 0.7rem; }
 .grid figcaption .t { display: block; font-style: italic; font-size: 0.85rem; }

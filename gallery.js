@@ -70,24 +70,110 @@
            (extra ? '<span class="m">' + esc(extra) + "</span>" : "");
   }
 
-  function imgOrBlock(src, altText, background) {
-    return src
-      ? '<img src="' + esc(src) + '" alt="' + esc(altText) +
-        '" style="background:' + esc(background) + '">'
-      : '<div class="fallback" style="background:' + esc(background) + '"></div>';
+  /* ─────────────────────────────────────────────────────────────
+     Photographs of paintings on canvas carry a fine, perfectly
+     regular weave. Shrink one straight from 2400 pixels down to
+     200 and that weave beats against the pixel grid, producing
+     moiré — the shimmering bands you see on a striped shirt on
+     television. Browsers use a fast, cheap downscaler that
+     aliases badly at those ratios.
+
+     So we do it ourselves: halve the image repeatedly until it's
+     within twice the size we need, then make the last step. Each
+     halving averages four pixels into one, which removes the fine
+     detail that would otherwise alias. Slower than letting the
+     browser do it, and worth every millisecond.
+     ───────────────────────────────────────────────────────────── */
+
+  function smoothCanvas(cv) {
+    var ctx = cv.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+    return ctx;
   }
 
-  // A missing photo becomes the work's tone colour rather than a
-  // broken-image icon.
-  function catchMissingImages(root) {
-    var imgs = root.querySelectorAll("img");
-    for (var i = 0; i < imgs.length; i++) {
-      imgs[i].addEventListener("error", function () {
-        var block = document.createElement("div");
-        block.className = "fallback";
-        block.style.background = this.style.background || "#6A6254";
-        if (this.parentNode) this.parentNode.replaceChild(block, this);
-      });
+  // Draws `img` into `cv` at `cssW` × `cssH`, cropped to fill like
+  // object-fit: cover. `factor` lets us re-render sharper when the
+  // camera has stepped in close.
+  function drawShot(cv, img, cssW, cssH, factor) {
+    if (!img.naturalWidth || !cssW || !cssH) return;
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var tw = Math.round(cssW * dpr * (factor || 1));
+    var th = Math.round(cssH * dpr * (factor || 1));
+
+    // Never ask for more pixels than the photograph actually has.
+    var cap = Math.min(img.naturalWidth / cssW, 4) * cssW * dpr;
+    if (tw > cap) { th = Math.round(th * cap / tw); tw = Math.round(cap); }
+    if (tw < 1 || th < 1) return;
+
+    // Which part of the photo to use, matching object-fit: cover.
+    var fill = Math.max(tw / img.naturalWidth, th / img.naturalHeight);
+    var sw = Math.min(img.naturalWidth, tw / fill);
+    var sh = Math.min(img.naturalHeight, th / fill);
+    var sx = (img.naturalWidth - sw) / 2;
+    var sy = (img.naturalHeight - sh) / 2;
+
+    // Step down by halves until we're within 2× of the target.
+    var cur = img, cw = sw, ch = sh, ox = sx, oy = sy;
+
+    while (cw > tw * 2 && ch > th * 2) {
+      var nw = Math.max(tw, Math.round(cw / 2));
+      var nh = Math.max(th, Math.round(ch / 2));
+      var step = document.createElement("canvas");
+      step.width = nw; step.height = nh;
+      smoothCanvas(step).drawImage(cur, ox, oy, cw, ch, 0, 0, nw, nh);
+      cur = step; cw = nw; ch = nh; ox = 0; oy = 0;
+    }
+
+    cv.width = tw;
+    cv.height = th;
+    smoothCanvas(cv).drawImage(cur, ox, oy, cw, ch, 0, 0, tw, th);
+    cv.dataset.drawn = "1";
+  }
+
+  // Each painting gets a canvas rather than an <img>. Keeps the
+  // loaded photo on the element so it can be redrawn on resize or
+  // when the camera moves closer.
+  function mountShot(holder, src, altText, background, cssW, cssH) {
+    holder.style.background = background;
+
+    if (!src) {
+      holder.innerHTML = '<div class="fallback" style="background:' +
+                         esc(background) + '"></div>';
+      return;
+    }
+
+    var cv = document.createElement("canvas");
+    cv.className = "shot";
+    cv.setAttribute("role", "img");
+    cv.setAttribute("aria-label", altText);
+    holder.innerHTML = "";
+    holder.appendChild(cv);
+
+    var img = new Image();
+    img.decoding = "async";
+
+    img.onload = function () {
+      holder._shot = { img: img, cv: cv };
+      var w = cssW || holder.clientWidth;
+      var h = cssH || Math.round(w * img.naturalHeight / img.naturalWidth);
+      drawShot(cv, img, w, h, 1);
+    };
+
+    // A missing photo becomes the work's tone colour rather than a
+    // broken-image icon.
+    img.onerror = function () {
+      holder.innerHTML = '<div class="fallback" style="background:' +
+                         esc(background) + '"></div>';
+    };
+
+    img.src = src;
+  }
+
+  function redrawShot(holder, cssW, cssH, factor) {
+    if (holder && holder._shot) {
+      drawShot(holder._shot.cv, holder._shot.img, cssW, cssH, factor);
     }
   }
 
@@ -105,7 +191,7 @@
   var zoomLabel  = document.getElementById("zoom-label");
   var zoomThumbs = document.getElementById("zoom-thumbs");
 
-  var hung = [];     // { el, centre, heightPx }
+  var hung = [];     // { el, centre, widthPx, heightPx }
   var anchorX = 0.30;
   var atWall = 0;
   var zoomed = false;
@@ -117,16 +203,15 @@
     strip.innerHTML = paintings.map(function (w, i) {
       return '<button class="hung" type="button" data-wall="' + i + '"' +
              ' aria-label="' + esc(w.title) + '">' +
-             '<span class="canvas">' + imgOrBlock(w.image, altOf(w), tone(w)) + "</span>" +
+             '<span class="canvas"></span>' +
              '<span class="didactic">' + labelHTML(w) + "</span>" +
              "</button>";
     }).join("");
 
     hung = [].slice.call(strip.querySelectorAll(".hung")).map(function (el) {
-      return { el: el, centre: 0, heightPx: 0 };
+      return { el: el, centre: 0, widthPx: 0, heightPx: 0 };
     });
 
-    catchMissingImages(strip);
     layoutWall();
   }
 
@@ -180,6 +265,14 @@
 
       hung[i].centre = cursor + wPx / 2;
       hung[i].heightPx = hPx;
+      hung[i].widthPx = wPx;
+
+      // First pass mounts the photo; later passes (a resize) just
+      // redraw it at the new size.
+      var holder = el.querySelector(".canvas");
+      if (holder._shot) redrawShot(holder, wPx, hPx, 1);
+      else mountShot(holder, w.image, altOf(w), tone(w), wPx, hPx);
+
       cursor += wPx + gap;
     });
 
@@ -230,6 +323,11 @@
     camera.classList.remove("is-moving");
     camera.style.transform = "scale(" + scale + ")";
     zoomed = true;
+
+    // Up close there are more pixels to fill, so redraw from the
+    // original photo at the larger size rather than stretching
+    // the version made for the wall.
+    redrawShot(h.el.querySelector(".canvas"), h.widthPx, h.heightPx, scale);
     viewIndex = 0;
     room.classList.add("is-zoomed");
     paintZoomBar();
@@ -243,12 +341,21 @@
     room.classList.remove("is-zoomed");
     zoomBar.hidden = true;
     setCanvasImage(viewsOf(paintings[atWall])[0]);
+    var back = hung[atWall];
+    redrawShot(back.el.querySelector(".canvas"), back.widthPx, back.heightPx, 1);
   }
 
   function setCanvasImage(v) {
-    if (!v) return;
-    var img = hung[atWall].el.querySelector(".canvas img");
-    if (img && v.image) img.src = v.image;
+    if (!v || !v.image) return;
+    var h = hung[atWall];
+    var holder = h.el.querySelector(".canvas");
+    var w = paintings[atWall];
+    mountShot(holder, v.image, altOf(w), tone(w), h.widthPx, h.heightPx);
+    // Redraw at the close-up size once the new photo has loaded.
+    var factor = zoomed ? Math.min((viewport.clientHeight * ZOOM_FILL) / h.heightPx, 3.2) : 1;
+    setTimeout(function () {
+      redrawShot(holder, h.widthPx, h.heightPx, factor);
+    }, 60);
   }
 
   function paintZoomBar() {
@@ -287,13 +394,21 @@
     }
 
     el.innerHTML = drawings.map(function (w) {
+      var d = dims(w);
       return "<figure>" +
-             '<span class="plate">' + imgOrBlock(w.image, altOf(w), tone(w)) + "</span>" +
+             '<span class="plate" style="aspect-ratio:' + d.w + "/" + d.h + '"></span>' +
              "<figcaption>" + labelHTML(w) + "</figcaption>" +
              "</figure>";
     }).join("");
 
-    catchMissingImages(el);
+    // Same staged downscale as the wall — drawings on textured
+    // paper alias just as readily as canvas weave.
+    [].slice.call(el.querySelectorAll(".plate")).forEach(function (holder, i) {
+      var w = drawings[i];
+      var box = holder.getBoundingClientRect();
+      mountShot(holder, w.image, altOf(w), tone(w),
+                Math.round(box.width), Math.round(box.height));
+    });
   }
 
   /* ─── Interaction ──────────────────────────────────────────── */
