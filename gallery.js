@@ -27,6 +27,7 @@
   var FILL_HEIGHT = 0.50;  // how much wall the tallest painting fills
   var FILL_WIDTH  = 0.36;  // ditto for the widest
   var ZOOM_FILL   = 0.74;  // how much of the screen a painting fills up close
+  var STACK_FILL  = 1.15;  // close-up stack height, against the painting's
   var ANCHOR      = 0.30;  // where the current painting sits across the wall
                            // (0 = hard left, 0.5 = middle)
 
@@ -102,9 +103,14 @@
     var tw = Math.round(cssW * dpr * (factor || 1));
     var th = Math.round(cssH * dpr * (factor || 1));
 
-    // Never ask for more pixels than the photograph actually has.
-    var cap = Math.min(img.naturalWidth / cssW, 4) * cssW * dpr;
-    if (tw > cap) { th = Math.round(th * cap / tw); tw = Math.round(cap); }
+    // Never ask for more pixels than the photograph actually has —
+    // but do let it use all of them. A close-up is small on the wall
+    // and large once you've stepped in, so capping against its
+    // unzoomed size would throw away the detail it exists to show.
+    if (tw > img.naturalWidth) {
+      th = Math.round(th * img.naturalWidth / tw);
+      tw = img.naturalWidth;
+    }
     if (tw < 1 || th < 1) return;
 
     // Which part of the photo to use, matching object-fit: cover.
@@ -196,6 +202,7 @@
   var anchorX = 0.30;
   var atWall = 0;
   var zoomed = false;
+  var zoomScale = 1;     // how far in the camera has stepped
   var viewIndex = 0;
 
   function buildWall() {
@@ -287,7 +294,7 @@
       var holder = el.querySelector(".canvas");
       if (holder._shot) redrawShot(holder, wPx, hPx, 1);
 
-      layoutDetails(i, cursor, wPx, hPx, H);
+      layoutDetails(i, cursor, wPx, hPx, H, gap);
 
       cursor += wPx + gap;
     });
@@ -298,7 +305,7 @@
 
   // A stack of close-ups on the wall to the right of a painting,
   // sized so the group reads as secondary to the work itself.
-  function layoutDetails(i, paintingLeft, wPx, hPx, H) {
+  function layoutDetails(i, paintingLeft, wPx, hPx, H, gapPx) {
     var box = strip.querySelector('.details[data-for="' + i + '"]');
     if (!box) return;
 
@@ -310,10 +317,18 @@
     // from its own proportions, so nothing is cropped. The width
     // cap keeps a wide landscape close-up from overpowering the
     // painting it belongs to.
-    var slotH = Math.min((hPx - (n - 1) * gapY) / n, hPx * 0.5);
-    var maxW  = wPx * 0.72;
+    // The stack runs a little taller than the painting so each
+    // close-up is big enough to actually read as paint. The width
+    // allowance is generous for the same reason — a crop of
+    // brushwork is worthless at thumbnail size.
+    var slotH = (hPx * STACK_FILL - (n - 1) * gapY) / n;
 
-    box.style.left   = (paintingLeft + wPx + wPx * 0.18) + "px";
+    // How much bare wall there is before the next painting, minus
+    // the standoff and a margin so the two groups never crowd.
+    var offset = wPx * 0.18;
+    var maxW = Math.min(wPx * 1.25, gapPx * 0.78 - offset);
+
+    box.style.left   = (paintingLeft + wPx + offset) + "px";
     box.style.top    = (H * HANG_LINE) + "px";
     box.style.height = "";          // shrink to fit, so it stays centred
     box.style.width  = "";
@@ -337,7 +352,12 @@
 
     el.style.width  = Math.round(w) + "px";
     el.style.height = Math.round(h) + "px";
-    if (img) redrawShot(el, Math.round(w), Math.round(h), 1);
+
+    // Close-ups are only ever seen with the camera stepped in, so
+    // draw them at that size. Drawing at 1x and letting the browser
+    // stretch the result is what made them mushy — the whole point
+    // of a close-up is the weave and the brush mark.
+    if (img) redrawShot(el, Math.round(w), Math.round(h), zoomScale);
   }
 
   // Photos for the close-ups aren't fetched until someone actually
@@ -358,6 +378,17 @@
       mountShot(el, src, w.title + " — detail " + (k + 1), tone(w), slotH, slotH,
                 function () { fitDetail(el, slotH, maxW); });
     });
+  }
+
+  // Called when the camera arrives, so already-loaded close-ups are
+  // redrawn at the closer size rather than stretched.
+  function refitDetails(i) {
+    var box = strip.querySelector('.details[data-for="' + i + '"]');
+    if (!box) return;
+    var kids = box.querySelectorAll(".detail");
+    for (var k = 0; k < kids.length; k++) {
+      fitDetail(kids[k], box._slotH || 160, box._maxW || 240);
+    }
   }
 
   function showDetails(i, on) {
@@ -436,6 +467,7 @@
     camera.classList.remove("is-moving");
     camera.style.transform = "scale(" + scale + ")";
     zoomed = true;
+    zoomScale = scale;
 
     // Up close there are more pixels to fill, so redraw from the
     // original photo at the larger size rather than stretching
@@ -447,6 +479,7 @@
     // bar at the bottom.
     if (!isNarrow()) {
       mountDetails(atWall);
+      refitDetails(atWall);
       showDetails(atWall, true);
     }
     viewIndex = 0;
@@ -459,6 +492,7 @@
     if (!zoomed) return;
     camera.style.transform = "";
     zoomed = false;
+    zoomScale = 1;
     room.classList.remove("is-zoomed");
     zoomBar.hidden = true;
     hideAllDetails();
